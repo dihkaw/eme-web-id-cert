@@ -42,6 +42,30 @@
   }
 
   /* ---------- TABLE VIEW ---------- */
+  .check-bar {
+    display: flex; gap: .6rem; margin-bottom: 1.2rem; flex-wrap: wrap;
+  }
+  .check-bar input {
+    flex: 1; min-width: 220px;
+    padding: .7rem .9rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: .95rem;
+  }
+  .check-bar input:focus { outline: 2px solid var(--primary); border-color: transparent; }
+  .check-bar button {
+    padding: .7rem 1.4rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .check-bar button:hover { background: #1e40af; }
+  .check-error { color: var(--danger); font-size: .85rem; margin: -0.8rem 0 1rem; display: none; }
+
   .search-bar { margin-bottom: 1rem; }
   .search-bar input {
     width: 100%;
@@ -149,6 +173,11 @@ function renderTable(data) {
     </tr>`).join("");
 
   app.innerHTML = `
+    <div class="check-bar">
+      <input type="text" id="certId" placeholder="Masukkan ID Sertifikat, contoh: 26jce001rscgrdjdpa" autocomplete="off">
+      <button id="checkBtn" type="button">Cek Sertifikat</button>
+    </div>
+    <div class="check-error" id="checkError">ID sertifikat tidak ditemukan. Periksa kembali ID yang dimasukkan.</div>
     <div class="card">
       <div class="search-bar">
         <input type="text" id="search" placeholder="Cari berdasarkan ID, nama, atau skill…" autocomplete="off">
@@ -175,6 +204,22 @@ function renderTable(data) {
       history.pushState({}, "", "/cert/" + tr.dataset.id);
       route(data);
     });
+  });
+
+  // Manual certificate ID check
+  const doCheck = () => {
+    const id = document.getElementById("certId").value.trim();
+    const err = document.getElementById("checkError");
+    if (!id) { err.style.display = "block"; return; }
+    const found = data.find(c => c.id.toLowerCase() === id.toLowerCase());
+    if (!found) { err.style.display = "block"; return; }
+    err.style.display = "none";
+    history.pushState({}, "", "/cert/" + found.id);
+    route(data);
+  };
+  document.getElementById("checkBtn").addEventListener("click", doCheck);
+  document.getElementById("certId").addEventListener("keydown", e => {
+    if (e.key === "Enter") doCheck();
   });
 
   // Search filter
