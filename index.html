@@ -128,7 +128,7 @@ const BASE_URL = "https://eme.web.id/cert/";
 const app = document.getElementById("app");
 
 async function loadData() {
-  const res = await fetch("data.json");
+  const res = await fetch("/data.json");
   if (!res.ok) throw new Error("Gagal memuat data.json");
   return res.json();
 }
