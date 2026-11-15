@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verifikasi Sertifikasi — EME</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.js"></script>
+<script src="/qrcode.min.js"></script>
 <style>
   :root {
     --primary: #1a56db;
@@ -89,7 +89,7 @@
   tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; }
   tbody tr:hover { background: #f0f6ff; }
   td.qr-cell { text-align: center; }
-  td.qr-cell canvas { width: 44px !important; height: 44px !important; }
+  td.qr-cell img, td.qr-cell canvas { width: 44px !important; height: 44px !important; }
   .badge {
     display: inline-block;
     padding: .2rem .55rem;
@@ -123,7 +123,7 @@
     border-radius: 12px;
     margin: 1rem 0;
   }
-  .qr-box canvas { width: 180px !important; height: 180px !important; }
+  .qr-box img, .qr-box canvas { width: 180px !important; height: 180px !important; display: block; }
   .meta { text-align: left; margin-top: 1.2rem; }
   .meta .row {
     display: flex; justify-content: space-between; gap: 1rem;
@@ -169,7 +169,7 @@ function renderTable(data) {
       <td><span class="badge ${escapeHtml(c.cert)}">${escapeHtml(c.skill)}</span></td>
       <td>${escapeHtml(c.issue)}</td>
       <td>${escapeHtml(c.valid)}</td>
-      <td class="qr-cell"><canvas data-qrcode="${BASE_URL + escapeHtml(c.id)}"></canvas></td>
+      <td class="qr-cell" data-qrcode="${BASE_URL + escapeHtml(c.id)}"></td>
     </tr>`).join("");
 
   app.innerHTML = `
@@ -194,8 +194,13 @@ function renderTable(data) {
     </div>`;
 
   // Render QR per row
-  document.querySelectorAll("canvas[data-qrcode]").forEach(el => {
-    QRCode.toCanvas(el, el.dataset.qrcode, { width: 88, margin: 0 });
+  document.querySelectorAll("[data-qrcode]").forEach(el => {
+    new QRCode(el, {
+      text: el.dataset.qrcode,
+      width: 88, height: 88,
+      colorDark: "#000000", colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
   });
 
   // Row click -> detail page
@@ -257,7 +262,7 @@ function renderDetail(data, id) {
       <span class="status ${valid ? "valid" : "expired"}">${valid ? "VALID" : "EXPIRED"}</span>
       <h2>${escapeHtml(c.nama)}</h2>
       <div class="skill">${escapeHtml(c.skill)}</div>
-      <div class="qr-box"><canvas id="qr"></canvas></div>
+      <div class="qr-box" id="qr"></div>
       <div class="meta">
         <div class="row"><span class="label">Certificate ID</span><span class="value">${escapeHtml(c.id)}</span></div>
         <div class="row"><span class="label">Date Issue</span><span class="value">${escapeHtml(c.issue)}</span></div>
@@ -267,7 +272,12 @@ function renderDetail(data, id) {
       </div>
       <a class="back-link" href="/">&larr; Kembali ke daftar sertifikat</a>
     </div>`;
-  QRCode.toCanvas(document.getElementById("qr"), BASE_URL + c.id, { width: 360, margin: 1 });
+  new QRCode(document.getElementById("qr"), {
+    text: BASE_URL + c.id,
+    width: 360, height: 360,
+    colorDark: "#000000", colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.M
+  });
 }
 
 function route(data) {
